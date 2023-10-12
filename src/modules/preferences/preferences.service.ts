@@ -38,9 +38,9 @@ export class PreferencesService {
                 let tags = data[j]['tags'];
                 let attention = data[j]['attention'];
 
-                let isContentAttempted = data[j]['isAnsCorrect'];
+                let isAnswerCorrect = data[j]['isAnsCorrect'];
                 
-                if(isContentAttempted != null) {
+                if(isAnswerCorrect != null) {
                     for(let k in tags) {      
                         if(!tagWiseAnswers[tags[k]]) {
                             tagWiseAnswers[tags[k]] = {
@@ -49,7 +49,7 @@ export class PreferencesService {
                             };
                         }
                         
-                        if(isContentAttempted == true) {
+                        if(isAnswerCorrect == true) {
                             tagWiseAnswers[tags[k]]['correct']++;
                         }
                         else {
@@ -88,15 +88,15 @@ export class PreferencesService {
             let studentResult = studentWiseResults[i];
             let studentId = new ObjectId(i);
             
-            let updatedResponse = await this.usersModel.findOneAndUpdate({
+            
+            response.push(this.usersModel.findOneAndUpdate({
                 _id: studentId 
             },{
                 topics: studentResult
-            });
-            
-            response.push(updatedResponse);
+            }));
         }
-
+        
+        response = await Promise.all(response);
         return response;
     }
 
