@@ -11,6 +11,7 @@ import { UserModule } from './modules/user/user.module';
 import { ItemsModule } from './modules/items/items.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { PreferencesModule } from './modules/preferences/preferences.module';
     ItemsModule,
     UserModule, 
     TagsModule, 
-    PreferencesModule
+    PreferencesModule,
+    ScheduleModule.forRoot()
   ],
   controllers: [AppController],
   providers: [

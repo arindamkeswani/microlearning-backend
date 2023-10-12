@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Content } from 'src/schemas/content.schema';
 import mongoose, { Types } from 'mongoose';
 import { Activity } from 'src/schemas/activity.schema';
 import { User } from 'src/schemas/users.schema';
 const ObjectId = Types.ObjectId;
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class PreferencesService {
@@ -16,8 +17,13 @@ export class PreferencesService {
         @InjectModel(User.name)
         private usersModel: mongoose.Model<User>,
     ) { }
+    
+    private readonly logger = new Logger(PreferencesService.name);
 
+    @Cron('45 * * * * *')
     async updateUserTopics() {
+        this.logger.debug('Cron Called when the current second is 45');
+
         let acitivities = await this.getActivities();    
 
         let studentWiseObj = await this.getStudentWiseData(acitivities);
@@ -87,7 +93,6 @@ export class PreferencesService {
             },{
                 topics: studentResult
             });
-            console.log(1);
             
             response.push(updatedResponse);
         }
