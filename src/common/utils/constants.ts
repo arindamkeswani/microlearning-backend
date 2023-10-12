@@ -64,3 +64,9 @@ export function getTranslationPrompt(inputLang, outputLang, transcript) {
   return `Assuming that languages are mentioned here as their ISO-639-1 codes, translate the following audio transcript from "${inputLang}" to "${outputLang}":${transcript}`
 } 
 export const SEPARATOR = '\n'
+
+export const INTEREST_LEVEL = {
+  HIGH: "HIGH",
+  MEDIUM: "MEDIUM",
+  LOW: "LOW"
+}

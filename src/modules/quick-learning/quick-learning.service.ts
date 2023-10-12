@@ -12,9 +12,7 @@ import {
 import { Activity } from 'src/schemas/activity.schema';
 import { TagsService } from '../tags/tags.service';
 import { User } from 'src/schemas/users.schema';
-import { MAX_TAG_LIMIT } from 'src/common/utils/constants';
-
-
+import { INTEREST_LEVEL, MAX_TAG_LIMIT } from 'src/common/utils/constants';
 
 @Injectable()
 export class QuickLearningService {
@@ -40,10 +38,10 @@ export class QuickLearningService {
 
   async recordStudentActivity(activity: RecordActivityDto) {
     //record attention
-    if(activity.attention < 20) {
+    if (activity.attention < 20) {
       return {
-        message: "Ignored this activity due to inufficient attention"
-      }
+        message: 'Ignored this activity due to inufficient attention',
+      };
     }
     return await this.activityModel.create(activity);
   }
@@ -130,12 +128,13 @@ export class QuickLearningService {
     //P1
     // Get content based on interest (while filtering out viewed content)
     console.log(`-----Fetching High-Interest Content`);
-    const freshContentHighInterest = await this.getContentByInterest(
-      userId,
-      0,
-      MAX_TAG_LIMIT,
-      contentIdsToBeExcluded,
-    ) || [];
+    const freshContentHighInterest =
+      (await this.getContentByInterest(
+        userId,
+        0,
+        MAX_TAG_LIMIT,
+        contentIdsToBeExcluded,
+      )) || [];
 
     count.highInterest = freshContentHighInterest.length;
     validContentIds = [...validContentIds, ...freshContentHighInterest];
@@ -169,7 +168,9 @@ export class QuickLearningService {
     let randomContent;
     if (isFeedFull == false) {
       console.log(
-        `-----Insufficient low-interest content. Found: ${count.lowInterest} | Required: ${limit - count.highInterest} `,
+        `-----Insufficient low-interest content. Found: ${
+          count.lowInterest
+        } | Required: ${limit - count.highInterest} `,
       );
       console.log(`-----Fetching Random Content`);
       contentIdsToBeExcluded = [
@@ -177,7 +178,10 @@ export class QuickLearningService {
         ...freshContentLowInterest,
       ];
 
-      let currFetchedContent = [...freshContentHighInterest, ...freshContentLowInterest]
+      const currFetchedContent = [
+        ...freshContentHighInterest,
+        ...freshContentLowInterest,
+      ];
       randomContent = await this.getRandomContentForFeed(
         limit,
         currFetchedContent,
@@ -186,19 +190,25 @@ export class QuickLearningService {
       validContentIds = [...validContentIds, ...randomContent];
     }
     console.log(
-      `-----Random content breakdown - Found: ${count.random} | Required: ${limit - count.highInterest - count.lowInterest} `,
+      `-----Random content breakdown - Found: ${count.random} | Required: ${
+        limit - count.highInterest - count.lowInterest
+      } `,
     );
 
     //fetch content info and return
-    validContentIds = validContentIds.slice(0,limit);
-    let contentInfo = await this.contentModel.find(
-      { _id: { $in: validContentIds } }
-    ).populate( { path: "tags", select: "_id name"} )
+    validContentIds = validContentIds.slice(0, limit);
+    const contentInfo = await this.contentModel
+      .find({ _id: { $in: validContentIds } })
+      .populate({ path: 'tags', select: '_id name' })
+      .lean();
+
+    const contentInfoWithInterestLevel =
+      await this.addInterestLevelToContentInfo(contentInfo, count);
 
     return {
-      data: contentInfo,
-      metadata: count
-    }
+      data: contentInfoWithInterestLevel,
+      metadata: count,
+    };
   }
 
   private async getContentByInterest(
@@ -277,17 +287,25 @@ export class QuickLearningService {
       }
     }
 
-    console.log(`--------- User has watched videos: ${watchedOverlap.join(', ')}`);
+    console.log(
+      `--------- User has watched videos: ${watchedOverlap.join(', ')}`,
+    );
     return cumulativeContentIds;
   }
 
   private async getRandomContentForFeed(limit, contentIdsToBeExcluded) {
     //get content which has been submitted, i.e. it should have a caption, and a default language
     let randomContent = await this.contentModel.aggregate([
-      { $match: {
-        language: { $ne: null },
-        _id: { $nin: contentIdsToBeExcluded.map( contentId => { return new Types.ObjectId(contentId) } ) }
-      } },
+      {
+        $match: {
+          language: { $ne: null },
+          _id: {
+            $nin: contentIdsToBeExcluded.map((contentId) => {
+              return new Types.ObjectId(contentId);
+            }),
+          },
+        },
+      },
       { $sample: { size: limit } },
       { $project: { _id: 1, uploadedBy: 1 } },
     ]);
@@ -297,5 +315,37 @@ export class QuickLearningService {
     });
 
     return randomContent;
+  }
+
+  private async addInterestLevelToContentInfo(contentInfo, count) {
+    const newContentInfo = [];
+    const countCopy = { ...count };
+    for (let i = 0; i < contentInfo.length; i++) {
+      const currContent = contentInfo[i];
+      if (countCopy.highInterest > 0) {
+        newContentInfo.push({
+          ...currContent,
+          interestLevel: INTEREST_LEVEL.HIGH,
+        });
+        // console.log('High: ', countCopy.highInterest);
+        countCopy.highInterest = countCopy.highInterest - 1;
+      } else if (countCopy.mediumInterest > 0) {
+        newContentInfo.push({
+          ...currContent,
+          interestLevel: INTEREST_LEVEL.MEDIUM,
+        });
+        // console.log('Medium: ', countCopy.mediumInterest);
+        countCopy.mediumInterest = countCopy.mediumInterest - 1;
+      } else {
+        newContentInfo.push({
+          ...currContent,
+          interestLevel: INTEREST_LEVEL.LOW,
+        });
+        // console.log('Low: ', countCopy.random);
+        countCopy.random = countCopy.random - 1;
+      }
+    }
+
+    return newContentInfo;
   }
 }
