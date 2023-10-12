@@ -30,6 +30,7 @@
     "@nestjs/mapped-types": "^1.2.2",
     "@nestjs/mongoose": "^9.2.2",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/schedule": "^3.0.4",
     "@nestjs/swagger": "^6.3.0",
     "blob": "^0.1.0",
     "class-transformer": "^0.5.1",
