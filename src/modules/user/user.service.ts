@@ -32,5 +32,9 @@ export class UserService {
         
         return userDetails;
     }
+    async getUserbyId(id){
+        return await this.usersModel.find({_id:id})
+
+    }
 
 }
