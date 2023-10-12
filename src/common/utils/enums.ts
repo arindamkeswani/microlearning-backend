@@ -18,3 +18,8 @@ export enum Roles {
     user = 'user',
     employee = 'employee'
 }
+
+export enum ItemTypes {
+    BATCH = 'batch',
+    STORE = 'store'
+}

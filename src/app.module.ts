@@ -8,6 +8,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { AwsModule } from './modules/aws/aws.module';
 import { QuickLearningModule } from './modules/quick-learning/quick-learning.module';
 import { UserModule } from './modules/user/user.module';
+import { ItemsModule } from './modules/items/items.module';
 import { TagsModule } from './modules/tags/tags.module';
 
 @Module({
@@ -20,6 +21,8 @@ import { TagsModule } from './modules/tags/tags.module';
     AiModule,
     AwsModule,
     QuickLearningModule, 
+    UserModule,
+    ItemsModule,
     UserModule, 
     TagsModule
   ],
