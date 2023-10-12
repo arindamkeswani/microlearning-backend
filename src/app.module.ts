@@ -6,7 +6,7 @@ import { CoreModule } from './core/core.module';
 import { CLogger } from './bootstrap/logger.service';
 import { AiModule } from './modules/ai/ai.module';
 import { AwsModule } from './modules/aws/aws.module';
-// import { QuickLearningModule } from './modules/quick-learning/quick-learning.module';
+import { QuickLearningModule } from './modules/quick-learning/quick-learning.module';
 // import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -18,7 +18,7 @@ import { AwsModule } from './modules/aws/aws.module';
     CoreModule,
     AiModule,
     AwsModule,
-    // QuickLearningModule,
+    QuickLearningModule, 
     // UserModule,
   ],
   controllers: [AppController],
