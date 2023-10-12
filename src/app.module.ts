@@ -12,6 +12,7 @@ import { ItemsModule } from './modules/items/items.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { PreferencesModule } from './modules/preferences/preferences.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DashboardsModule } from './modules/dashboards/dashboards.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     UserModule, 
     TagsModule, 
     PreferencesModule,
-    ScheduleModule.forRoot()
+    ScheduleModule.forRoot(),
+    DashboardsModule
   ],
   controllers: [AppController],
   providers: [

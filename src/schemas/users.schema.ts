@@ -5,7 +5,7 @@ import { Tag } from './tags.schema';
 
 @Schema({ _id: false })
 export class Interests {
-    @Prop({ required: true, type: String, ref: Tag.name })
+    @Prop({ required: true, type: Types.ObjectId, ref: Tag.name })
     tag: string
 
     @Prop({ required: true, type: Number})
@@ -14,7 +14,7 @@ export class Interests {
 
 @Schema({ _id: false })
 export class Strengths {
-    @Prop({ required: true, type: String, ref: Tag.name })
+    @Prop({ required: true, type: Types.ObjectId, ref: Tag.name })
     tag: string
 
     @Prop({ required: true, type: Number})
@@ -26,7 +26,7 @@ export class Strengths {
 
 @Schema({ _id: false })
 export class Weaknesses {
-    @Prop({ required: true, type: String, ref: Tag.name })
+    @Prop({ required: true, type: Types.ObjectId, ref: Tag.name })
     tag: string
 
     @Prop({ required: true, type: Number})
@@ -41,7 +41,7 @@ export class Topics {
     //each key will store an array on tags
     @Prop({ required: true, type: [Object], default: [], ref: Tag.name })
     interests: Interests[];
-
+ 
     @Prop({ required: true, type: [Object], default: [], ref: Tag.name })
     strengths: Strengths[];
 
