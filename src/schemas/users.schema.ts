@@ -23,13 +23,15 @@ export class Topics {
 export class User {
     @Prop({ required: true, unique: true })
     username: string;
+    
+    @Prop({ required: true, unique: true })
+    contact: string;
 
     @Prop({ required: true, enum: Roles })
     role: Roles;
 
     @Prop({ required: false, type: Topics, default: null })
     topics: Topics;
-
 }
 
 export const UsersSchema = SchemaFactory.createForClass(User);

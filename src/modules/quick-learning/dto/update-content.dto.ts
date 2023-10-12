@@ -10,7 +10,7 @@ export class UpdateContentDto{
 
     @IsArray()
     @ArrayNotEmpty()
-    tags: string;   
+    tags: [string];   
 
     @IsString()
     @IsNotEmpty()

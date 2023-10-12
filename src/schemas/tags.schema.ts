@@ -9,7 +9,7 @@ export class Tag {
     @Prop({required: true, unique: true})
     name: string;
 
-    @Prop({ required: true, type: [String] })
+    @Prop({ required: false, type: [String] })
     content: String[];
 
 }
