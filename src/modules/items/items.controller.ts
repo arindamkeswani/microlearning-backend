@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { ItemService } from "./items.service";
-import { CreateItemDto, MongoIdDto } from "./dto/itmes.dto";
+import { CreateItemDto, GetRecommendedItemsDto, MongoIdDto } from "./dto/itmes.dto";
 
 @Controller('items')
 export class ItemsController{
     constructor(
-        private itemService:ItemService
+        private itemService:ItemService,
     ){}
 
     @Get()
@@ -36,5 +36,12 @@ export class ItemsController{
         @Param() param :MongoIdDto
     ){
         return this.itemService.deleteItem(param)
+    }
+
+    @Get("/recommended")
+    async getRecommendedItems(
+        @Query() query:GetRecommendedItemsDto
+    ){
+        return this.itemService.getRecommendedItems(query)
     }
 }
