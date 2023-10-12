@@ -8,11 +8,14 @@ import {
   CheckAnswerDto,
   RecordActivityDto,
   UpdateContentDto,
+  DeleteTagsDto,
 } from './dto';
 import { Activity } from 'src/schemas/activity.schema';
 import { TagsService } from '../tags/tags.service';
 import { User } from 'src/schemas/users.schema';
 import { INTEREST_LEVEL, MAX_TAG_LIMIT } from 'src/common/utils/constants';
+import { isArray } from 'class-validator';
+const ObjectId = Types.ObjectId;
 
 @Injectable()
 export class QuickLearningService {
@@ -347,5 +350,23 @@ export class QuickLearningService {
     }
 
     return newContentInfo;
+  }
+  async deleteContent(body: DeleteTagsDto) {
+    const { id } = body;
+    let contentAr: Array<any> = [];
+
+    if (!isArray(id)) {
+      contentAr.push(id);
+    } else {
+      contentAr = id;
+    }
+
+    contentAr = contentAr.map((el) => new ObjectId(el));
+
+    return await this.contentModel.deleteMany({
+      _id: {
+        $in: contentAr,
+      },
+    });
   }
 }
