@@ -3,6 +3,7 @@ import { AddContentEntryDto, GetFeedDto, RecordActivityDto } from './dto';
 import { QuickLearningService } from './quick-learning.service'
 import { CheckAnswerDto } from './dto/check-answer.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
+import { Pagination } from 'src/common/decorators';
  
 
 @Controller('quick-learning')
@@ -49,10 +50,11 @@ export class QuickLearningController {
 
     @Get('feed')
     async getQlFeed(
-        @Query() q: GetFeedDto
+        @Query() q: GetFeedDto,
+        @Pagination() p
     ) {
         let {user} = q
-        await this.qlService.getQlFeed(user, q.page, q.limit);
+        return await this.qlService.getQlFeed(user, p.limit);
     }
 
 }

@@ -7,9 +7,9 @@ export class GetFeedDto{
     @IsMongoId()
     user: string;
 
-    @IsOptional()
-    limit: number
+    // @IsOptional()
+    limit: number | string
 
     @IsOptional()
-    page: number   
+    page?: number   
 }
