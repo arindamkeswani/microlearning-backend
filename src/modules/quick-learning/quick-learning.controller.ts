@@ -1,5 +1,5 @@
-import { Body, Controller, Patch, Post } from '@nestjs/common';
-import { AddContentEntryDto, RecordActivityDto } from './dto';
+import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
+import { AddContentEntryDto, GetFeedDto, RecordActivityDto } from './dto';
 import { QuickLearningService } from './quick-learning.service'
 import { CheckAnswerDto } from './dto/check-answer.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
@@ -45,6 +45,14 @@ export class QuickLearningController {
         @Body() body: UpdateContentDto
     ) {
         return await this.qlService.updateContent(body);
+    }
+
+    @Get('feed')
+    async getQlFeed(
+        @Query() q: GetFeedDto
+    ) {
+        let {user} = q
+        await this.qlService.getQlFeed(user, q.page, q.limit);
     }
 
 }

@@ -8,6 +8,10 @@ export class UpdateContentDto{
     @IsNotEmpty()
     id: string
 
+    @IsString()
+    @IsNotEmpty()
+    caption: string
+
     @IsArray()
     @ArrayNotEmpty()
     tags: [string];   

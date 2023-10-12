@@ -2,12 +2,20 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { Roles } from 'src/common/utils/enums';
 
+@Schema({ _id: false })
+export class Interests {
+    @Prop({ required: true, type: String })
+    tag: string
+
+    @Prop({ required: true, type: Number})
+    attention: number
+}
 
 @Schema({ _id: false })
 export class Topics {
     //each key will store an array on tags
-    @Prop({ required: true, type: [String], default: [] })
-    interests: String[];
+    @Prop({ required: true, type: [Object], default: [] })
+    interests: Interests[];
 
     @Prop({ required: true, type: [String], default: [] })
     strengths: String[];

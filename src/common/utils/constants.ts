@@ -3,6 +3,7 @@ export const MAX_ROW_LIMIT = 50;
 export const MIN_PAGE_NUMBER = 1;
 export const UNBOUNDED_ROW_LIMIT = 10000
 export const URL_EXPIRATION_SECONDS = 5000
+export const MAX_TAG_LIMIT = 5
 
 export class ResponseStatus {
     static Ok = 200;
