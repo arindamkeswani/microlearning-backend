@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ItemTypes } from "src/common/utils/enums";
+import { Tag } from "./tags.schema";
+import mongoose, { Types } from 'mongoose';
 
 @Schema({
     collection: "items",
@@ -24,11 +26,15 @@ export class item {
     @Prop({ required: false })
     discount: number;
 
-    @Prop({ required: true, type: [String] })
-    tags: String[];
+    @Prop({ required: true, type: [String] ,ref:Tag.name})
+    tags: Tag[];
 
     @Prop({ required: true, type: String, enum: ItemTypes })
     type: String;
+
+    @Prop({ required: true, type: Types.Decimal128 })
+    rating: mongoose.Decimal128;
+
 
 
 }

@@ -4,11 +4,13 @@ import mongoose, { Types } from 'mongoose';
 import { item } from "src/schemas/items.schema";
 import { CreateItemDto } from "./dto/itmes.dto";
 import { ItemTypes } from "src/common/utils/enums";
+import { CommonFunctions } from "src/common/utils/common-functions";
 @Injectable()
 export class ItemService {
     constructor(
         @InjectModel(item.name)
         private itemModel: mongoose.Model<item>,
+        private commonFunctions: CommonFunctions,
     ) { }
     async getItemList(query) {
         const itemParams:any={
@@ -25,11 +27,15 @@ export class ItemService {
             itemParams.searchParams.type=ItemTypes.STORE
         }
 
-        return await this.itemModel.find(itemParams.searchParams).sort(itemParams.sort).skip(page*limit).limit(limit).lean()
+        return await this.itemModel.find(itemParams.searchParams).sort(itemParams.sort).skip(page*limit).limit(limit).populate({path:"tags",select:"name"}).lean()
     }
 
     async addItem(body:CreateItemDto){
-        return await this.itemModel.create(body)
+        const data={
+            ...body,
+            rating:await this.commonFunctions.getRandomRating()
+        }
+        return await this.itemModel.create(data)
     }
 
     async updateItem(body,params){
