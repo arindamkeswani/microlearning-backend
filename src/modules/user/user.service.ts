@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { createUserDto, loginUserDto } from './dto';
 import * as mongoose from "mongoose";
@@ -21,10 +21,14 @@ export class UserService {
         let selectFields = { '__v': 0 };
 
         let userDetails = await this.usersModel.find({
-            username: body.username
+            contact: body.contact
         })
         .select(selectFields)
         .lean();
+        
+        if(!userDetails.length) {
+            throw new HttpException('user not found', 404)
+        }
         
         return userDetails;
     }
