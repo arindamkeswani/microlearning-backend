@@ -3,3 +3,4 @@ export * from './record-activity.dto'
 export * from './check-answer.dto'
 export * from './update-content.dto'
 export * from './get-feed.dto'
+export * from './delete-content.dto';

@@ -8,12 +8,14 @@ import {
   CheckAnswerDto,
   RecordActivityDto,
   UpdateContentDto,
+  DeleteTagsDto
 } from './dto';
 import { Activity } from 'src/schemas/activity.schema';
 import { TagsService } from '../tags/tags.service';
 import { User } from 'src/schemas/users.schema';
 import { MAX_TAG_LIMIT } from 'src/common/utils/constants';
-
+import { isArray } from 'class-validator';
+const ObjectId = Types.ObjectId;
 
 
 @Injectable()
@@ -27,7 +29,7 @@ export class QuickLearningService {
     private tagsService: TagsService,
     @InjectModel(User.name)
     private userModel: mongoose.Model<User>,
-  ) {}
+  ) { }
 
   async addNewContentEntry(contentInfo: AddContentEntryDto) {
     return (await this.contentModel.insertMany([contentInfo]))[0];
@@ -292,5 +294,25 @@ export class QuickLearningService {
     });
 
     return randomContent;
+  }
+
+  async deleteContent(body: DeleteTagsDto) {
+    let { id } = body;
+    let contentAr: Array<any> = [];
+
+    if (!isArray(id)) {
+      contentAr.push(id);
+    }
+    else {
+      contentAr = id;
+    }
+
+    contentAr = contentAr.map(el => new ObjectId(el));
+
+    return await this.contentModel.deleteMany({
+      _id: {
+        $in: contentAr
+      }
+    });
   }
 }
