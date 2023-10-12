@@ -3,11 +3,17 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Content } from 'src/schemas/content.schema';
 import mongoose, { Types } from 'mongoose';
-import { AddContentEntryDto, CheckAnswerDto, RecordActivityDto, UpdateContentDto } from './dto';
+import {
+  AddContentEntryDto,
+  CheckAnswerDto,
+  RecordActivityDto,
+  UpdateContentDto,
+} from './dto';
 import { Activity } from 'src/schemas/activity.schema';
 import { TagsService } from '../tags/tags.service';
 import { User } from 'src/schemas/users.schema';
 import { MAX_TAG_LIMIT } from 'src/common/utils/constants';
+
 
 
 @Injectable()
@@ -18,7 +24,7 @@ export class QuickLearningService {
     private contentModel: mongoose.Model<Content>,
     @InjectModel(Activity.name)
     private activityModel: mongoose.Model<Activity>,
-    private tagsService:TagsService,
+    private tagsService: TagsService,
     @InjectModel(User.name)
     private userModel: mongoose.Model<User>,
   ) {}
@@ -35,143 +41,256 @@ export class QuickLearningService {
   async recordStudentActivity(activity: RecordActivityDto) {
     //record attention
     return await this.activityModel.create(activity);
-
   }
 
   async checkAnswer(body: CheckAnswerDto) {
     const { contentId, user, language, selectedOptionIdx } = body;
     //if the activity document has not been created yet AND if student has previously submitted this question
-    const attentionDocs = await this.activityModel.find({
+    const attentionDocs = await this.activityModel
+      .find({
         contentId: contentId,
-        user: user, 
-    }).lean()
-    .sort({createdAt: -1});
+        user: user,
+      })
+      .lean()
+      .sort({ createdAt: -1 });
 
     // console.log(attentionDocs);
-    if(attentionDocs.length == 0){
-        throw new BadRequestException("Record activity before checking answer")
+    if (attentionDocs.length == 0) {
+      throw new BadRequestException('Record activity before checking answer');
     }
 
-    for(let i=0; i<attentionDocs.length; i++){
-        let currDoc = attentionDocs[i];
-        if(currDoc.isAnsCorrect!=null){ //student has submitted previously, this is not allowed
-            throw new BadRequestException("You have already submitted this question")
-        }
+    for (let i = 0; i < attentionDocs.length; i++) {
+      const currDoc = attentionDocs[i];
+      if (currDoc.isAnsCorrect != null) {
+        //student has submitted previously, this is not allowed
+        throw new BadRequestException(
+          'You have already submitted this question',
+        );
+      }
     }
-   
+
     //Check if answer submitted by the student is correct
-    const ansInfo = await this.contentModel.findOne({_id: contentId}, 'correctOptionIdx');
+    const ansInfo = await this.contentModel.findOne(
+      { _id: contentId },
+      'correctOptionIdx',
+    );
     const currLanguageAnsIdx = ansInfo.correctOptionIdx[language];
 
     const isAnsCorrect = selectedOptionIdx == currLanguageAnsIdx;
-    
+
     //add submission info to activity table
-    let updationResponse = await this.activityModel.updateOne(
-      {_id: attentionDocs[0]},
-      {isAnsCorrect}
-    )
+    const updationResponse = await this.activityModel.updateOne(
+      { _id: attentionDocs[0] },
+      { isAnsCorrect },
+    );
 
     //return correctness and correct answer index
     return {
       isAnsCorrect: isAnsCorrect,
       correctIdx: currLanguageAnsIdx,
-      metadata: updationResponse
-    }
+      metadata: updationResponse,
+    };
   }
 
-  async updateContent(body: UpdateContentDto){
+  async updateContent(body: UpdateContentDto) {
     const contentId = body.id;
-    const filter = { _id: contentId }
+    const filter = { _id: contentId };
     delete body.id;
 
-    let tagsResponse = await this.tagsService.createTagsMap({id: body.tags, content: contentId});
+    const tagsResponse = await this.tagsService.createTagsMap({
+      id: body.tags,
+      content: contentId,
+    });
 
     return {
-        contentUpdation: await this.contentModel.updateOne(filter, body),
-        tagsUpdation: tagsResponse
-    }
+      contentUpdation: await this.contentModel.updateOne(filter, body),
+      tagsUpdation: tagsResponse,
+    };
   }
 
-
-  async getQlFeed(userId, page, limit){
-    let isFeedFull = false
-    let videosToBeExcluded = []
-    let validContentIds = []
-    //Get user's interests (tags)
-    const interests = await this.getStudentInterests(userId, 0, MAX_TAG_LIMIT);
-    const interestTags = interests.map( row => { return row.tag } );
-    console.log(interests, interestTags);
+  async getQlFeed(userId, limit) {
+    let isFeedFull = false;
+    let contentIdsToBeExcluded = [];
+    let validContentIds = [];
+    const count = {
+      highInterest: 0,
+      lowInterest: 0,
+      random: 0,
+    };
 
     //Get user's watchedContent
     const watchedContentIds = await this.getWatchedContentIds(userId);
-    videosToBeExcluded = [...videosToBeExcluded, ...watchedContentIds];
+    contentIdsToBeExcluded = [...contentIdsToBeExcluded, ...watchedContentIds];
 
     //P1
     // Get content based on interest (while filtering out viewed content)
-    const freshContentHighInterest = await this.getFreshContentForFeed(interestTags, videosToBeExcluded)
-    console.log(`${freshContentHighInterest.length} high interest video(s) found: `, freshContentHighInterest);
-    //check if info is sufficient, get content details, if yes, randomize
-    if(freshContentHighInterest.length >= limit) {
-      isFeedFull = true;
-      validContentIds = [...freshContentHighInterest]
-    }
+    console.log(`-----Fetching High-Interest Content`);
+    const freshContentHighInterest = await this.getContentByInterest(
+      userId,
+      0,
+      MAX_TAG_LIMIT,
+      contentIdsToBeExcluded,
+    ) || [];
+
+    count.highInterest = freshContentHighInterest.length;
+    validContentIds = [...validContentIds, ...freshContentHighInterest];
+    isFeedFull = validContentIds >= limit ? true : false;
+
+    //P2
     //if insufficient, get all remaining tags and repeat process
-    // if(isFeedFull == false && )
+    let freshContentLowInterest = [];
+    if (isFeedFull == false) {
+      console.log(
+        `-----Insufficient high-interest content. Found: ${count.highInterest} | Required: ${limit} `,
+      );
+      console.log(`-----Fetching Low-Interest Content`);
+      contentIdsToBeExcluded = [
+        ...contentIdsToBeExcluded,
+        ...freshContentHighInterest,
+      ];
+      freshContentLowInterest = await this.getContentByInterest(
+        userId,
+        MAX_TAG_LIMIT,
+        1000,
+        contentIdsToBeExcluded,
+      );
+      count.lowInterest = freshContentLowInterest.length;
+      validContentIds = [...validContentIds, ...freshContentLowInterest];
+    }
+    isFeedFull = validContentIds >= limit ? true : false;
+
+    //P3
     //if still insufficient, get random un-watched content and return
+    let randomContent;
+    if (isFeedFull == false) {
+      console.log(
+        `-----Insufficient low-interest content. Found: ${count.lowInterest} | Required: ${limit - count.highInterest} `,
+      );
+      console.log(`-----Fetching Random Content`);
+      contentIdsToBeExcluded = [
+        ...contentIdsToBeExcluded,
+        ...freshContentLowInterest,
+      ];
 
+      let currFetchedContent = [...freshContentHighInterest, ...freshContentLowInterest]
+      randomContent = await this.getRandomContentForFeed(
+        limit,
+        currFetchedContent,
+      );
+      count.random = randomContent.length;
+      validContentIds = [...validContentIds, ...randomContent];
+    }
+    console.log(
+      `-----Random content breakdown - Found: ${count.random} | Required: ${limit - count.highInterest - count.lowInterest} `,
+    );
 
+    //fetch content info and return
+    validContentIds = validContentIds.slice(0,limit);
+    let contentInfo = await this.contentModel.find(
+      { _id: { $in: validContentIds } }
+    ).populate( { path: "tags", select: "_id name"} )
 
+    return {
+      data: contentInfo,
+      metadata: count
+    }
   }
 
-  private async getStudentInterests(userId, min, max){
+  private async getContentByInterest(
+    userId,
+    minRank,
+    maxRank,
+    contentIdsToBeExcluded,
+  ) {
+    //Get user's interests (tags)
+    const interests = await this.getStudentInterests(userId, minRank, maxRank);
+    const interestTags = interests.map((row) => {
+      return row.tag;
+    });
+    // console.log(interests, interestTags);
+
+    const validContentIds = await this.getFreshContentForFeed(
+      interestTags,
+      contentIdsToBeExcluded,
+    );
+    console.log(
+      `${validContentIds.length} high interest video(s) found: `,
+      validContentIds,
+    );
+
+    return validContentIds ? validContentIds : [];
+  }
+
+  private async getStudentInterests(userId, min, max) {
     const userInfo: any = await this.userModel.findOne(
-      {_id: userId},  "contact topics"
-    )
+      { _id: userId },
+      'contact topics',
+    );
     //user preferences have not been calculated yet
-    if(userInfo == null || userInfo.topics == null){
+    if (userInfo == null || userInfo.topics == null) {
       return [];
     }
 
     //Get Top tags
-    const interests = userInfo?.topics?.interests ? userInfo.topics.interests.slice(min, max) : []
+    const interests = userInfo?.topics?.interests
+      ? userInfo.topics.interests.slice(min, max)
+      : [];
     return interests;
   }
 
-  private async getWatchedContentIds(userId){
-    let activiyList = await this.activityModel.find(
-      {user: userId}, "contentId"
-    ).limit(500);
+  private async getWatchedContentIds(userId) {
+    const activiyList = await this.activityModel
+      .find({ user: userId }, 'contentId')
+      .limit(500);
 
-    let contentIdList = activiyList.map( row => {
+    const contentIdList = activiyList.map((row) => {
       return row.contentId.toString();
-    } )
+    });
 
     return contentIdList;
   }
 
-  private async getFreshContentForFeed(interests, watchedContentIds){
-    let cumulativeContentIds = []
-    let watchedOverlap = []
+  private async getFreshContentForFeed(interests, watchedContentIds) {
+    const cumulativeContentIds = [];
+    const watchedOverlap = [];
 
     //get content based on tags
-    let tagWiseContent = await this.tagsService.getTagsByIds(interests)
+    const tagWiseContent = await this.tagsService.getTagsByIds(interests);
 
     //filter out watched content
-    for(let i=0; i < tagWiseContent.length; i++){
-      let currTagInfo = tagWiseContent[i];
-      let currTagContent = currTagInfo.content || [];
-      for(let j=0; j < currTagContent.length; j++){
-        let currContentId = currTagContent[j];
-        if(watchedContentIds.includes(currContentId) == false){ //unwatched content
+    for (let i = 0; i < tagWiseContent.length; i++) {
+      const currTagInfo = tagWiseContent[i];
+      const currTagContent = currTagInfo.content || [];
+      for (let j = 0; j < currTagContent.length; j++) {
+        const currContentId = currTagContent[j];
+        if (watchedContentIds.includes(currContentId) == false) {
+          //unwatched content
           cumulativeContentIds.push(currContentId);
-        } else{
-          watchedOverlap.push(currContentId)
+        } else {
+          watchedOverlap.push(currContentId);
         }
       }
     }
-    
-    console.log(`User has watched videos: ${watchedOverlap.join(', ')}`);
+
+    console.log(`--------- User has watched videos: ${watchedOverlap.join(', ')}`);
     return cumulativeContentIds;
-    
+  }
+
+  private async getRandomContentForFeed(limit, contentIdsToBeExcluded) {
+    //get content which has been submitted, i.e. it should have a caption, and a default language
+    let randomContent = await this.contentModel.aggregate([
+      { $match: {
+        language: { $ne: null },
+        _id: { $nin: contentIdsToBeExcluded.map( contentId => { return new Types.ObjectId(contentId) } ) }
+      } },
+      { $sample: { size: limit } },
+      { $project: { _id: 1, uploadedBy: 1 } },
+    ]);
+
+    randomContent = randomContent.map((row) => {
+      return row._id.toString();
+    });
+
+    return randomContent;
   }
 }

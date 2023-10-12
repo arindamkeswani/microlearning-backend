@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { ContentTypes, Languages } from 'src/common/utils/enums';
+import { Tag } from './tags.schema';
 
 
 @Schema({ _id: false })
@@ -78,8 +79,8 @@ export class Content {
     @Prop({required: false, type: CorrectOption})
     correctOptionIdx: CorrectOption;
 
-    @Prop({required: false, type: [String], default: []})
-    tags: String[];
+    @Prop({required: false, type: [Types.ObjectId], default: [], ref: Tag.name})
+    tags: Types.ObjectId[];
 
 }
 
