@@ -6,14 +6,14 @@ import { Roles } from 'src/common/utils/enums';
 @Schema({ _id: false })
 export class Topics {
     //each key will store an array on tags
-    @Prop({ required: true, type: [String], default: [] })
-    interests: String[];
+    @Prop({ required: true, type: [Object], default: [] })
+    interests: Object[];
 
-    @Prop({ required: true, type: [String], default: [] })
-    strengths: String[];
+    @Prop({ required: true, type: [Object], default: [] })
+    strengths: Object[];
 
-    @Prop({ required: true, type: [String], default: [] })
-    weaknesses: String[];
+    @Prop({ required: true, type: [Object], default: [] })
+    weaknesses: Object[];
 }
 
 @Schema({

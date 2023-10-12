@@ -15,6 +15,6 @@ export enum GetPresignedUrlEnum {
 }
 
 export enum Roles {
-    user = 'user',
+    student = 'student',
     employee = 'employee'
 }

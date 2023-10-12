@@ -9,6 +9,7 @@ import { AwsModule } from './modules/aws/aws.module';
 import { QuickLearningModule } from './modules/quick-learning/quick-learning.module';
 import { UserModule } from './modules/user/user.module';
 import { TagsModule } from './modules/tags/tags.module';
+import { PreferencesModule } from './modules/preferences/preferences.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { TagsModule } from './modules/tags/tags.module';
     AwsModule,
     QuickLearningModule, 
     UserModule, 
-    TagsModule
+    TagsModule, 
+    PreferencesModule
   ],
   controllers: [AppController],
   providers: [
