@@ -8,6 +8,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { AwsModule } from './modules/aws/aws.module';
 import { QuickLearningModule } from './modules/quick-learning/quick-learning.module';
 import { UserModule } from './modules/user/user.module';
+import { ItemsModule } from './modules/items/items.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserModule } from './modules/user/user.module';
     AwsModule,
     QuickLearningModule, 
     UserModule,
+    ItemsModule
   ],
   controllers: [AppController],
   providers: [
