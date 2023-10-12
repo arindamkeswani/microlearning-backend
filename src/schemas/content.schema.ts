@@ -56,7 +56,7 @@ export class Content {
     @Prop({ required: true, enum: ContentTypes, default: ContentTypes.VIDEO })
     type: ContentTypes;
 
-    @Prop({ required: true, type: String })
+    @Prop({ required: false, type: String })
     caption: string;
 
     @Prop({ required: true, type: Types.ObjectId })
