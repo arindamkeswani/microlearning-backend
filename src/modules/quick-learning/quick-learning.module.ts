@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Content, ContentSchema } from 'src/schemas/content.schema';
 import { Activity, ActivitySchema } from 'src/schemas/activity.schema';
 import { TagsModule } from '../tags/tags.module';
+import { User, UsersSchema } from 'src/schemas/users.schema';
 
 @Module({
   controllers: [QuickLearningController],
@@ -14,7 +15,8 @@ import { TagsModule } from '../tags/tags.module';
     ApisModule,
     MongooseModule.forFeature([
       { name: Content.name, schema: ContentSchema },
-      { name: Activity.name, schema: ActivitySchema }
+      { name: Activity.name, schema: ActivitySchema },
+      { name: User.name, schema: UsersSchema }
     ]),
     TagsModule
   ]

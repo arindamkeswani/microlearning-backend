@@ -104,5 +104,14 @@ export class TagsService {
 
         return tags;
     }
+
+    async getTagsByIds(tagIds) {
+        let tags = await this.tagsModel.find(
+            {
+                _id: { "$in": tagIds }
+            }
+        )
+        return tags;
+    }
 }
 
