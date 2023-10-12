@@ -9,6 +9,7 @@ import { AwsModule } from './modules/aws/aws.module';
 import { QuickLearningModule } from './modules/quick-learning/quick-learning.module';
 import { UserModule } from './modules/user/user.module';
 import { ItemsModule } from './modules/items/items.module';
+import { TagsModule } from './modules/tags/tags.module';
 
 @Module({
   imports: [
@@ -21,7 +22,9 @@ import { ItemsModule } from './modules/items/items.module';
     AwsModule,
     QuickLearningModule, 
     UserModule,
-    ItemsModule
+    ItemsModule,
+    UserModule, 
+    TagsModule
   ],
   controllers: [AppController],
   providers: [

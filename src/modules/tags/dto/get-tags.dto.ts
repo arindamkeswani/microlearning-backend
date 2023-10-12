@@ -1,6 +1,9 @@
 import { IsNotEmpty } from "class-validator";
 
-export class loginUserDto {
+
+export class getTagsDto {
+    
     @IsNotEmpty()
-    contact: string
+    q: [string] | string
+    
 }

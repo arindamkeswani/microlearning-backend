@@ -146,7 +146,7 @@ export class AiService {
     language: Languages,
     regenerate: boolean,
   ) {
-    let contentObj = {};
+    let contentObj: any = {};
     let source;
     let updationResponse;
     const existingContent = await this.contentModel.findOne(
@@ -192,7 +192,7 @@ export class AiService {
         );
         const { q, options, ansIdx } = quesObj;
 
-        contentObj = {
+        contentObj  = {
           [`question.${language}`]: q,
           [`options.${language}`]: options,
           [`correctOptionIdx.${language}`]: Number.isNaN(ansIdx)
@@ -205,6 +205,15 @@ export class AiService {
           contentId,
           contentObj,
         );
+
+        //handling format
+        contentObj["question"] = {}; contentObj["question"][language] = contentObj[`question.${language}`]
+        contentObj["options"] = {}; contentObj["options"][language] = contentObj[`options.${language}`]
+        contentObj["correctOptionIdx"] = {};  contentObj["correctOptionIdx"][language] = contentObj[`correctOptionIdx.${language}`]
+
+        delete contentObj[`question.${language}`];
+        delete contentObj[`options.${language}`];
+        delete contentObj[`correctOptionIdx.${language}`];
 
         source = 'new';
       }

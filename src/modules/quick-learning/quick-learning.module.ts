@@ -5,6 +5,7 @@ import { ApisModule } from 'src/common/apis/apis.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Content, ContentSchema } from 'src/schemas/content.schema';
 import { Activity, ActivitySchema } from 'src/schemas/activity.schema';
+import { TagsModule } from '../tags/tags.module';
 
 @Module({
   controllers: [QuickLearningController],
@@ -15,6 +16,7 @@ import { Activity, ActivitySchema } from 'src/schemas/activity.schema';
       { name: Content.name, schema: ContentSchema },
       { name: Activity.name, schema: ActivitySchema }
     ]),
+    TagsModule
   ]
 })
 export class QuickLearningModule {}

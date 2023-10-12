@@ -5,6 +5,7 @@ import { Content } from 'src/schemas/content.schema';
 import mongoose, { Types } from 'mongoose';
 import { AddContentEntryDto, CheckAnswerDto, RecordActivityDto, UpdateContentDto } from './dto';
 import { Activity } from 'src/schemas/activity.schema';
+import { TagsService } from '../tags/tags.service';
 
 @Injectable()
 export class QuickLearningService {
@@ -14,6 +15,7 @@ export class QuickLearningService {
     private contentModel: mongoose.Model<Content>,
     @InjectModel(Activity.name)
     private activityModel: mongoose.Model<Activity>,
+    private tagsService:TagsService
   ) {}
 
   async addNewContentEntry(contentInfo: AddContentEntryDto) {
@@ -76,9 +78,12 @@ export class QuickLearningService {
     const contentId = body.id;
     const filter = { _id: contentId }
     delete body.id;
-    return await this.contentModel.updateOne(
-      filter, 
-      body
-    )
+
+    let tagsResponse = await this.tagsService.createTagsMap({id: body.tags, content: contentId});
+
+    return {
+        contentUpdation: await this.contentModel.updateOne(filter, body),
+        tagsUpdation: tagsResponse
+    }
   }
 }

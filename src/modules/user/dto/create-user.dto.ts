@@ -5,7 +5,10 @@ import { Roles } from "src/common/utils/enums";
 export class createUserDto {
     @IsNotEmpty()
     username: string
-    
+
+    @IsNotEmpty()
+    contact: string
+
     @IsNotEmpty()
     role: Roles       
 }
