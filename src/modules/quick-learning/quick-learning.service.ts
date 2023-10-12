@@ -203,6 +203,7 @@ export class QuickLearningService {
     const contentInfo = await this.contentModel
       .find({ _id: { $in: validContentIds } })
       .populate({ path: 'tags', select: '_id name' })
+      .populate({ path: 'uploadedBy', select: '_id username' })
       .lean();
 
     const contentInfoWithInterestLevel =
