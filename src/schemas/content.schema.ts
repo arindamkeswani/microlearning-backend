@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { ContentTypes, Languages } from 'src/common/utils/enums';
+import { Tag } from './tags.schema';
+import { User } from './users.schema';
 
 
 @Schema({ _id: false })
@@ -56,10 +58,10 @@ export class Content {
     @Prop({ required: true, enum: ContentTypes, default: ContentTypes.VIDEO })
     type: ContentTypes;
 
-    // @Prop({ required: true, type: String })
-    // url: string;
+    @Prop({ required: false, type: String })
+    caption: string;
 
-    @Prop({ required: true, type: Types.ObjectId })
+    @Prop({ required: true, type: Types.ObjectId, ref: User.name })
     uploadedBy: Types.ObjectId;
 
     @Prop({ required: false, type: String, default: null })
@@ -78,8 +80,8 @@ export class Content {
     @Prop({required: false, type: CorrectOption})
     correctOptionIdx: CorrectOption;
 
-    @Prop({required: false, type: [String], default: []})
-    tags: String[];
+    @Prop({required: false, type: [Types.ObjectId], default: [], ref: Tag.name})
+    tags: Types.ObjectId[];
 
 }
 

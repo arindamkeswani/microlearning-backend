@@ -24,6 +24,9 @@ export class UserService {
             contact: body.contact
         })
         .select(selectFields)
+        .populate({ path: `topics.interests.tag`, select: "name" })
+        .populate({ path: `topics.strengths.tag`, select: "name" })
+        .populate({ path: `topics.weaknesses.tag`, select: "name" })
         .lean();
         
         if(!userDetails.length) {

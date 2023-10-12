@@ -3,6 +3,7 @@ export const MAX_ROW_LIMIT = 50;
 export const MIN_PAGE_NUMBER = 1;
 export const UNBOUNDED_ROW_LIMIT = 10000
 export const URL_EXPIRATION_SECONDS = 5000
+export const MAX_TAG_LIMIT = 5
 
 export class ResponseStatus {
     static Ok = 200;
@@ -63,3 +64,9 @@ export function getTranslationPrompt(inputLang, outputLang, transcript) {
   return `Assuming that languages are mentioned here as their ISO-639-1 codes, translate the following audio transcript from "${inputLang}" to "${outputLang}":${transcript}`
 } 
 export const SEPARATOR = '\n'
+
+export const INTEREST_LEVEL = {
+  HIGH: "HIGH",
+  MEDIUM: "MEDIUM",
+  LOW: "LOW"
+}
