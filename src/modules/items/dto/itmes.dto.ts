@@ -33,3 +33,14 @@ export class MongoIdDto{
     @IsMongoId()
     id:string
 }
+
+
+export class GetRecommendedItemsDto{
+    @IsNotEmpty()
+    @IsMongoId()
+    userId:string
+
+    @IsNotEmpty()
+    @IsEnum(ItemTypes)
+    type:string
+}
