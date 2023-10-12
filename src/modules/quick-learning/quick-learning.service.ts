@@ -42,6 +42,11 @@ export class QuickLearningService {
 
   async recordStudentActivity(activity: RecordActivityDto) {
     //record attention
+    if(activity.attention < 20) {
+      return {
+        message: "Ignored this activity due to inufficient attention"
+      }
+    }
     return await this.activityModel.create(activity);
   }
 
