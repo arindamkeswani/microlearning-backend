@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/schemas/users.schema';
 import mongoose, { Types } from 'mongoose';
+import { Activity } from 'src/schemas/activity.schema';
+import { type } from 'os';
 
 @Injectable()
 export class DashboardsService {
   constructor(
     @InjectModel(User.name)
     private userModel: mongoose.Model<User>,
+    @InjectModel(Activity.name)
+        private activityModel: mongoose.Model<Activity>,
   ) {}
 
   async getStudentDashboard(limit, offset) {
@@ -74,5 +78,72 @@ export class DashboardsService {
     });
 
     return students;
+  }
+
+  async getLeaderboard(query){
+    const fulllData= await this.getUsersSortedByCorrectAnswersCount()
+    let returnDataLength=10
+    if(query.type=="admin"){
+        returnDataLength=fulllData.length
+    }
+    if(query.type=="student" && !query.userId){
+        throw new HttpException('userId is required', 400)
+    }
+
+    let responceArr=[]
+    fulllData.map((data,index)=>{
+        let newObj={
+            ...data,
+            ranking:index+1,
+            rewardPoints:data.correctAnswersCount*10
+        }
+        if(newObj._id==query.userId || index<10){
+            responceArr.push(newObj) 
+        }
+
+    })
+    return responceArr
+
+  }
+  async getUsersSortedByCorrectAnswersCount(): Promise<any[]> {
+    const aggregationPipeline = [
+      {
+        $match: { isAnsCorrect: true },
+      },
+      {
+        $group: {
+            _id: '$user',
+          correctAnswersCount: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          correctAnswersCount: -1,
+        } as Record<string, 1 | -1>,
+      },
+      {
+        $lookup: {
+          from: 'users', 
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      {
+        $unwind: '$user',
+      },
+      {
+        $project: {
+          _id: 1, 
+          correctAnswersCount: 1, 
+          'user.username': 1, 
+          'user._id': 1, 
+        },
+      },
+    ];
+
+    const sortedUsers = await this.activityModel.aggregate<any>(aggregationPipeline).exec();
+
+    return sortedUsers;
   }
 }
