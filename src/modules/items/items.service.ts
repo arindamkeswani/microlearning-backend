@@ -101,21 +101,21 @@ export class ItemService {
         const interestsSortedArr = interestsItemList
             .map((mango) => ({
                 ...mango,
-                interest: "high",
+                interest: "Interest",
                 matchingIds: mango.tags.filter((id) => interestsTagesArr.includes(id.toString())).length,
             }))
             .sort((a, b) => b.matchingIds - a.matchingIds);
         const strengthsSortedArr = strengthsItemList
             .map((mango) => ({
                 ...mango,
-                interest: "medium",
+                interest: "Strength",
                 matchingIds: mango.tags.filter((id) => strengthsTagesArr.includes(id.toString())).length,
             }))
             .sort((a, b) => b.matchingIds - a.matchingIds);
         const weaknessesSortedArr = weaknessesItemList
             .map((mango) => ({
                 ...mango,
-                interest: "low",
+                interest: "Weakness",
                 matchingIds: mango.tags.filter((id) => weaknessesTagesArr.includes(id.toString())).length,
             }))
             .sort((a, b) => b.matchingIds - a.matchingIds);
