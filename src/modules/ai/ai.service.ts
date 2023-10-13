@@ -190,9 +190,10 @@ export class AiService {
           transcript[language],
           language,
         );
-        const { q, options, ansIdx } = quesObj;
+        const { q, options, ansIdx, rawContent } = quesObj;
 
         contentObj  = {
+          rawContent,
           [`question.${language}`]: q,
           [`options.${language}`]: options,
           [`correctOptionIdx.${language}`]: Number.isNaN(ansIdx)
@@ -201,10 +202,11 @@ export class AiService {
         };
 
         // Updation of DB with aforementioned data
-        updationResponse = await this.saveGeneratedContentInDb(
-          contentId,
-          contentObj,
-        );
+        // REMOVEED DUE TO UNSTABLE BEHAVIOUR WITH FORMAT
+        // updationResponse = await this.saveGeneratedContentInDb(
+        //   contentId,
+        //   contentObj,
+        // );
 
         //handling format
         contentObj["question"] = {}; contentObj["question"][language] = contentObj[`question.${language}`]
@@ -324,6 +326,7 @@ export class AiService {
       q: generatedResponseSplit[0] || '',
       options: generatedResponseSplit.slice(1, 5) || ['', '', '', ''],
       ansIdx: generatedResponseSplit[generatedResponseSplit.length - 1] || null,
+      rawContent : generatedResponse
     };
 
     return quesObj;

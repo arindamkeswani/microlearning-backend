@@ -16,7 +16,7 @@ export class Activity {
     user: Types.ObjectId;
 
     // @Prop({ required: true, type: Languages })
-    // language: Languages;
+    // language: Languages; 
 
     //Between 0 & 100
     @Prop({ required: true, type: Number, default: 0 })
