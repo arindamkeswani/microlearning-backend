@@ -8,3 +8,13 @@ export class GetStudentDashboardDto{
     // @IsOptional()
     page: number | string
 }
+
+export class GetLeaderBoardDto{
+    @IsNotEmpty()
+    @IsEnum({ADMIN:"admin",STUDENT:"student"})
+    type:string
+
+    @IsOptional()
+    @IsMongoId()
+    userId:string
+}
