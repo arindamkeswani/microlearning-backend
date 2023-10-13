@@ -86,6 +86,7 @@ export class DashboardsService {
 
   async getLeaderboard(query){
     const fulllData= await this.getUsersSortedByCorrectAnswersCount()
+    console.log('fulllData', fulllData)
     let returnDataLength=10
     if(query.type=="admin"){
         returnDataLength=fulllData.length
