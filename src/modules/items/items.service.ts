@@ -120,9 +120,9 @@ export class ItemService {
             }))
             .sort((a, b) => b.matchingIds - a.matchingIds);
 
-        let responceArr = await this.arrayService.getRandomSubarray(interestsSortedArr.slice(0, limit), Math.round(limit / 2))
+        let responceArr = await this.arrayService.getRandomSubarray(weaknessesSortedArr.slice(0, limit), Math.round(limit / 2))
         responceArr = [...responceArr, ...await this.arrayService.getRandomSubarray(strengthsSortedArr.slice(0, limit), Math.round(limit * 0.83 - responceArr.length))]
-        responceArr = [...responceArr, ...await this.arrayService.getRandomSubarray(weaknessesSortedArr.slice(0, limit), Math.round(limit - responceArr.length))]
+        responceArr = [...responceArr, ...await this.arrayService.getRandomSubarray(interestsSortedArr.slice(0, limit), Math.round(limit - responceArr.length))]
         responceArr = this.arrayService.filterUniqueObjectsArrray(responceArr)
         if (limit > responceArr.length) {
             let uniqueIds = responceArr.map(item => item._id)
