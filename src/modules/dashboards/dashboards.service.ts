@@ -4,6 +4,8 @@ import { User } from 'src/schemas/users.schema';
 import mongoose, { Types } from 'mongoose';
 import { Activity } from 'src/schemas/activity.schema';
 import { type } from 'os';
+import { Tag } from 'src/schemas/tags.schema';
+const ObjectId = Types.ObjectId;
 
 @Injectable()
 export class DashboardsService {
@@ -12,6 +14,8 @@ export class DashboardsService {
     private userModel: mongoose.Model<User>,
     @InjectModel(Activity.name)
         private activityModel: mongoose.Model<Activity>,
+        @InjectModel(Tag.name)
+        private tagsModel: mongoose.Model<Tag>,
   ) {}
 
   async getStudentDashboard(limit, offset) {
@@ -146,4 +150,89 @@ export class DashboardsService {
 
     return sortedUsers;
   }
+
+
+  async getTagWiseData() {
+    let tagWiseData = {};
+
+    let userDetails = await this.userModel.find().lean(); 
+    
+    for(let i in userDetails) {
+      let userDetail = userDetails[i];
+      let topics = userDetail['topics'];
+      let interests = topics?.['interests'];
+      let strengths = topics?.['strengths'];
+      let weaknesses = topics?.['weaknesses'];
+      
+      for(let j in interests) {
+        if(!tagWiseData[interests[j]?.['tag']]) {
+            tagWiseData[interests[j]?.['tag']] = {
+              correctAns: 0,  
+              attention: 0,
+              views: 0,
+              totalAttempted: 0
+            };
+        }
+
+        tagWiseData[interests[j]?.['tag']]['views']++;
+        tagWiseData[interests[j]?.['tag']]['attention'] += interests[j]?.['attention'];
+      }
+
+      for(let j in strengths) {
+        if(!tagWiseData[strengths[j]?.['tag']]) {
+          tagWiseData[strengths[j]?.['tag']] = {
+            correctAns: 0,  
+            attention: 0,
+            views: 0,
+            totalAttempted: 0
+          };
+        }
+      
+        tagWiseData[strengths[j]?.['tag']]['views']++;
+        tagWiseData[strengths[j]?.['tag']]['correctAns'] += strengths[j]?.['correct'];
+        tagWiseData[strengths[j]?.['tag']]['totalAttempted'] += strengths[j]?.['incorrect'] + strengths[j]?.['correct'];
+      }
+      
+      for(let j in weaknesses) {
+        if(!tagWiseData[weaknesses[j]?.['tag']]) {
+          tagWiseData[weaknesses[j]?.['tag']] = {
+            correctAns: 0,  
+            attention: 0,
+            views: 0,
+            totalAttempted: 0
+          };
+        }
+      
+        tagWiseData[weaknesses[j]?.['tag']]['views']++;
+        tagWiseData[weaknesses[j]?.['tag']]['correctAns'] += weaknesses[j]?.['correct'];
+        tagWiseData[weaknesses[j]?.['tag']]['totalAttempted'] += weaknesses[j]?.['incorrect'] + weaknesses[j]?.['correct'];
+      }
+
+      
+    }
+
+    let tagsAr = [];
+    for(let j in tagWiseData) {
+      if(!j) {
+        delete tagWiseData[j];
+      }
+      tagsAr.push(new ObjectId(j));
+      tagWiseData[j]['attention'] = Number((tagWiseData[j]['attention'] / tagWiseData[j]['views']).toFixed(2));
+    }
+    
+    let tagsName = await this.tagsModel.find({_id: {$in: tagsAr}}).select({name: 1});
+    let tagsNameObj = {};
+    
+    for(let i in tagsName) {
+      tagsNameObj[tagsName[i]['_id']?.toString()] = tagsName[i]['name'];
+    }
+
+    for(let i in tagWiseData) {
+      tagWiseData[i]['name'] = tagsNameObj[i];
+    }
+    
+
+    return tagWiseData;
+  }
+
 }

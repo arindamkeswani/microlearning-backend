@@ -22,4 +22,10 @@ export class DashboardsController {
     ){
         return this.dashboardService.getLeaderboard(query)
     }
+
+    @Get('/topic-insights') 
+    
+    async getTagWiseData() {
+        return await this.dashboardService.getTagWiseData();
+    }
 }
