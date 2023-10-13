@@ -59,12 +59,12 @@ export class QuickLearningService {
     const attentionDocs = await this.activityModel
       .find({
         contentId: contentId,
-        user: user,
+        user: new Types.ObjectId(user),
       })
       .lean()
       .sort({ createdAt: -1 });
 
-    // console.log(attentionDocs);
+    // console.log(attentionDocs); 
     if (attentionDocs.length == 0) {
       throw new BadRequestException('Record activity before checking answer');
     }
