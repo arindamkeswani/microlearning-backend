@@ -75,25 +75,28 @@ export class ItemService {
             searchParams: {
                 tags: { $in: interestsTagesArr },
                 type: type
-            }
+            },
+            populate:{ path: "tags", select: "name" }
         }
         const strengthsItemParams = {
             searchParams: {
                 tags: { $in: strengthsTagesArr },
                 type: type
-            }
+            },
+            populate:{ path: "tags", select: "name" }
         }
         const weaknessesItemParams = {
             searchParams: {
                 tags: { $in: weaknessesTagesArr },
                 type: type
-            }
+            },
+            populate:{ path: "tags", select: "name" }
         }
         // const itemsList = await this.itemModel.find(interestsItemParams.searchParams).lean()
         const [interestsItemList, strengthsItemList, weaknessesItemList] = await Promise.all([
-            this.itemModel.find(interestsItemParams.searchParams).lean(),
-            this.itemModel.find(strengthsItemParams.searchParams).lean(),
-            this.itemModel.find(weaknessesItemParams.searchParams).lean()
+            this.itemModel.find(interestsItemParams.searchParams).populate(interestsItemParams.populate).lean(),
+            this.itemModel.find(strengthsItemParams.searchParams).populate(strengthsItemParams.populate).lean(),
+            this.itemModel.find(weaknessesItemParams.searchParams).populate(weaknessesItemParams.populate).lean()
         ])
         const interestsSortedArr = interestsItemList
             .map((mango) => ({
@@ -127,9 +130,10 @@ export class ItemService {
                 searchParams: {
                     _id: { $nin: uniqueIds },
                     type: type
-                }
+                },
+                populate:{ path: "tags", select: "name" }
             }
-            responceArr = [...responceArr, ...await this.itemModel.find(newItemParams.searchParams).limit(limit - responceArr.length).lean()]
+            responceArr = [...responceArr, ...await this.itemModel.find(newItemParams.searchParams).limit(limit - responceArr.length).populate(newItemParams.populate).lean()]
         }
 
         return responceArr
