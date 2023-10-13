@@ -46,7 +46,11 @@ export class QuickLearningService {
         message: 'Ignored this activity due to inufficient attention',
       };
     }
-    return await this.activityModel.create(activity);
+    let formattedActivity = {
+      ...activity,
+      user: new Types.ObjectId(activity.user)
+    }
+    return await this.activityModel.create(formattedActivity);
   }
 
   async checkAnswer(body: CheckAnswerDto) {
